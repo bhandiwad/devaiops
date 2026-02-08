@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# JS/TS
+node_modules/
+dist/
+build/
+coverage/
+.next/
+
+# Tooling
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.pid
+
+# Local env/config
+.env
+.env.*
+
+# Artifacts
+*.zip
+*.tar
+*.tar.gz
+
