@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aiops-platform-root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ssh://git.example/platform-gitops
+    targetRevision: main
+    path: platform/gitops/environments/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

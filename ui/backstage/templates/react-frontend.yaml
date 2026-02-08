@@ -1,0 +1,31 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: react-frontend
+  title: React Frontend
+  description: Create a React frontend with CI and GitOps overlays
+spec:
+  owner: platform-team
+  type: website
+  parameters:
+    - title: Service info
+      required: [tenant_id, service_name, owner]
+      properties:
+        tenant_id:
+          type: string
+        service_name:
+          type: string
+        owner:
+          type: string
+  steps:
+    - id: scaffold
+      name: Scaffold through Platform API
+      action: http:backstage:request
+      input:
+        method: POST
+        path: /platform-api/tenants/${{ parameters.tenant_id }}/scaffold
+        body:
+          template_id: react-frontend
+          parameters:
+            service_name: ${{ parameters.service_name }}
+            owner: ${{ parameters.owner }}

@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "required": [
+    "incident_id",
+    "tenant_id",
+    "alert",
+    "k8s",
+    "gitops"
+  ],
+  "properties": {
+    "incident_id": {
+      "type": "string"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "cluster_id": {
+      "type": "string"
+    },
+    "namespace": {
+      "type": "string"
+    },
+    "service": {
+      "type": "string"
+    },
+    "alert": {
+      "type": "object"
+    },
+    "k8s": {
+      "type": "object"
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "logs": {
+      "type": "object"
+    },
+    "gitops": {
+      "type": "object"
+    },
+    "redaction": {
+      "type": "object"
+    }
+  }
+}

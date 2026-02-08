@@ -1,0 +1,106 @@
+Metadata-Version: 2.4
+Name: aiops-platform-api
+Version: 0.1.0
+Summary: AIOps Platform API
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.115
+Requires-Dist: uvicorn[standard]>=0.30
+Requires-Dist: pydantic>=2.7
+Requires-Dist: pydantic-settings>=2.3
+Requires-Dist: PyYAML>=6.0
+Requires-Dist: jsonschema>=4.22
+Requires-Dist: SQLAlchemy>=2.0
+Requires-Dist: asyncpg>=0.29
+Requires-Dist: celery>=5.4
+Requires-Dist: redis>=5.0
+Requires-Dist: aiosqlite>=0.20
+Requires-Dist: greenlet>=3.0
+Requires-Dist: httpx>=0.27
+Requires-Dist: kubernetes>=30.1
+Requires-Dist: pyjwt>=2.9
+Requires-Dist: cryptography>=42.0
+Provides-Extra: test
+Requires-Dist: pytest>=8.2; extra == "test"
+Requires-Dist: pytest-asyncio>=0.23; extra == "test"
+
+# AIOps Platform API
+
+## Quickstart
+
+### Prereqs
+- Python 3.11+
+- [uv](https://github.com/astral-sh/uv)
+- Docker (for local Postgres)
+
+### 1) Start Postgres + Redis
+```bash
+cd /Users/pb/devops_ai/aiops_platform_docs/services/platform-api
+
+# start db
+
+docker compose up -d
+
+# initialize schema
+psql "postgresql://platform:platform@localhost:5432/platform" -f /Users/pb/devops_ai/aiops_platform_docs/db/schema.sql
+```
+
+### 2) Install deps
+```bash
+cd /Users/pb/devops_ai/aiops_platform_docs/services/platform-api
+uv venv
+source .venv/bin/activate
+uv pip install -e .[test]
+```
+
+### 3) Run the API (dev auth)
+```bash
+export DEV_AUTH=true
+export PLATFORM_CONFIG_PATH="/Users/pb/devops_ai/aiops_platform_docs/config/examples/platform_config.yaml"
+export ARGOCD_SERVER="https://argocd.example"
+export ARGOCD_TOKEN="changeme"
+export GITHUB_TOKEN="changeme"
+export PROMETHEUS_BASE_URL="http://prometheus:9090"
+export LOKI_BASE_URL="http://loki:3100"
+
+uvicorn src.main:app --reload --port 8000
+```
+
+### 3b) Run the API (Keycloak auth)
+```bash
+export DEV_AUTH=false
+export PLATFORM_CONFIG_PATH="/Users/pb/devops_ai/aiops_platform_docs/config/examples/platform_config.yaml"
+export ARGOCD_SERVER="https://argocd.example"
+export ARGOCD_TOKEN="changeme"
+export GITHUB_TOKEN="changeme"
+export PROMETHEUS_BASE_URL="http://prometheus:9090"
+export LOKI_BASE_URL="http://loki:3100"
+export VAULT_ADDR="http://localhost:8200"
+export VAULT_TOKEN="changeme"
+
+uvicorn src.main:app --reload --port 8000
+```
+
+### 4) Run the worker
+```bash
+export PLATFORM_CONFIG_PATH="/Users/pb/devops_ai/aiops_platform_docs/config/examples/platform_config.yaml"
+
+celery -A src.worker.celery_app worker --loglevel=INFO
+```
+
+### 5) Example request
+```bash
+curl -H 'X-Dev-Principal: {"principal_id":"dev-user","email":"dev@example.com","realm_roles":["platform_admin"],"tenant_roles":{"tenant-acme":["tenant_admin"]}}' \
+  http://localhost:8000/me
+```
+
+## Config
+- Default config path is `config/examples/platform_config.yaml` (override with `PLATFORM_CONFIG_PATH`).
+- Module catalog path is read from `PlatformConfig.modules.module_catalog_path`.
+- Provider profiles and tenant specs are loaded from `PlatformConfig.config_sources`.
+
+## Tests
+```bash
+cd /Users/pb/devops_ai/aiops_platform_docs/services/platform-api
+uv run pytest
+```

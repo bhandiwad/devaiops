@@ -1,0 +1,48 @@
+
+tenant_id: "tenant-zenith"
+display_name: "Zenith Ltd"
+mode: "PROVISIONED"
+provider_profile_id: "generic-k8s-on-vms"
+git:
+  repo_url: "ssh://git.example/zenith/tenant-gitops"
+  default_branch: "main"
+provisioner_ref:
+  type: "terraform"
+  module_path: "infra/terraform/modules/tenant-cluster"
+  workspace: "tenant-zenith-prod"
+  vars:
+    opaque:
+      # provider-specific variables are opaque to the platform core
+      cluster_name: "zenith-prod"
+modules:
+  enabled:
+    - "tenant.base"
+    - "obs.prom-grafana-loki"
+services:
+  - id: "inventory"
+    namespace: "default"
+    label_selector: "{app=\"inventory\"}"
+    gitops_app: "tenant-zenith-inventory"
+observability:
+  mode: "per-tenant"
+remediation_allowlist:
+  - "RESOURCE_TUNE"
+  - "HPA_TUNE"
+  - "ROLLBACK"
+policies:
+  allowed_modules:
+    - "tenant.base"
+    - "obs.prom-grafana-loki"
+    - "supplychain.sbom"
+  allowed_namespaces:
+    - "default"
+  allowed_runbooks:
+    - "cluster.scale"
+approval_policy:
+  low: "manual"
+  medium: "manual"
+  high: "manual"
+  provision:
+    plan: "auto"
+    apply: "manual"
+    destroy: "manual"

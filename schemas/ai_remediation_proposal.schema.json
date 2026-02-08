@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "required": [
+    "summary",
+    "likely_root_cause",
+    "confidence",
+    "fix_type",
+    "risk_level",
+    "validation_steps"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "likely_root_cause": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "fix_type": {
+      "type": "string"
+    },
+    "risk_level": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "git_changes": {
+      "type": "object"
+    },
+    "validation_steps": {
+      "type": "array"
+    },
+    "rollback_plan": {
+      "type": "string"
+    },
+    "evidence_refs": {
+      "type": "array"
+    }
+  }
+}

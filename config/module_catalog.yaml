@@ -1,0 +1,207 @@
+
+modules:
+  - id: "gitops.argocd"
+    version: "0.7.0"
+    type: "INSTALL"
+    scope: "management"
+    requirements:
+      adapters: ["gitops"]
+      capabilities: {}
+      optional: false
+    install:
+      argo_application_template:
+        metadata:
+          name: "{{tenant_id}}-gitops-argocd"
+        spec:
+          project: "{{tenant_id}}"
+          source:
+            repoURL: "{{tenant_repo_url}}"
+            targetRevision: "{{tenant_default_branch}}"
+            path: "modules/gitops/argocd"
+            helm:
+              values: ""
+          destination:
+            server: "https://kubernetes.default.svc"
+            namespace: "argocd"
+
+  - id: "secrets.vault"
+    version: "0.7.0"
+    type: "INSTALL"
+    scope: "management"
+    requirements:
+      adapters: ["secrets", "identity"]
+      capabilities: {}
+      optional: false
+    install:
+      argo_application_template:
+        metadata:
+          name: "{{tenant_id}}-secrets-vault"
+        spec:
+          project: "{{tenant_id}}"
+          source:
+            repoURL: "{{tenant_repo_url}}"
+            targetRevision: "{{tenant_default_branch}}"
+            path: "modules/secrets/vault"
+            helm:
+              values: ""
+          destination:
+            server: "https://kubernetes.default.svc"
+            namespace: "vault"
+
+  - id: "registry.harbor"
+    version: "0.7.0"
+    type: "INSTALL"
+    scope: "management"
+    requirements:
+      adapters: ["registry", "identity"]
+      capabilities: {}
+      optional: false
+    install:
+      argo_application_template:
+        metadata:
+          name: "{{tenant_id}}-registry-harbor"
+        spec:
+          project: "{{tenant_id}}"
+          source:
+            repoURL: "{{tenant_repo_url}}"
+            targetRevision: "{{tenant_default_branch}}"
+            path: "modules/registry/harbor"
+            helm:
+              values: ""
+          destination:
+            server: "https://kubernetes.default.svc"
+            namespace: "harbor"
+
+  - id: "obs.stack"
+    version: "0.7.0"
+    type: "INSTALL"
+    scope: "both"
+    requirements:
+      adapters: ["observability"]
+      capabilities:
+        supports_ingress: true
+      optional: true
+    install:
+      argo_application_template:
+        metadata:
+          name: "{{tenant_id}}-obs-stack"
+        spec:
+          project: "{{tenant_id}}"
+          source:
+            repoURL: "{{tenant_repo_url}}"
+            targetRevision: "{{tenant_default_branch}}"
+            path: "modules/observability/stack"
+            helm:
+              values: ""
+          destination:
+            server: "https://kubernetes.default.svc"
+            namespace: "observability"
+
+  - id: "obs.prom-grafana-loki"
+    version: "0.7.0"
+    type: "INSTALL"
+    scope: "both"
+    requirements:
+      adapters: ["observability"]
+      capabilities: {}
+      optional: false
+    install:
+      argo_application_template:
+        metadata:
+          name: "{{tenant_id}}-obs-prom-grafana-loki"
+        spec:
+          project: "{{tenant_id}}"
+          source:
+            repoURL: "{{tenant_repo_url}}"
+            targetRevision: "{{tenant_default_branch}}"
+            path: "modules/observability/prom-grafana-loki"
+            helm:
+              values: ""
+          destination:
+            server: "https://kubernetes.default.svc"
+            namespace: "observability"
+
+  - id: "aiops.core"
+    version: "0.7.0"
+    type: "INSTALL"
+    scope: "management"
+    requirements:
+      adapters: ["git_provider", "observability", "gitops", "k8s"]
+      capabilities: {}
+      optional: true
+    install:
+      argo_application_template:
+        metadata:
+          name: "{{tenant_id}}-aiops-core"
+        spec:
+          project: "{{tenant_id}}"
+          source:
+            repoURL: "{{tenant_repo_url}}"
+            targetRevision: "{{tenant_default_branch}}"
+            path: "modules/aiops/core"
+            helm:
+              values: ""
+          destination:
+            server: "https://kubernetes.default.svc"
+            namespace: "aiops"
+
+  - id: "ui.backstage"
+    version: "0.7.0"
+    type: "INSTALL"
+    scope: "management"
+    requirements:
+      adapters: ["identity", "gitops"]
+      capabilities: {}
+      optional: false
+    install:
+      argo_application_template:
+        metadata:
+          name: "{{tenant_id}}-ui-backstage"
+        spec:
+          project: "{{tenant_id}}"
+          source:
+            repoURL: "{{tenant_repo_url}}"
+            targetRevision: "{{tenant_default_branch}}"
+            path: "modules/ui/backstage"
+            helm:
+              values: ""
+          destination:
+            server: "https://kubernetes.default.svc"
+            namespace: "backstage"
+
+  - id: "tenant.base"
+    version: "0.7.0"
+    type: "INSTALL"
+    scope: "tenant"
+    requirements:
+      adapters: ["k8s"]
+      capabilities: {}
+      optional: false
+    install:
+      argo_application_template:
+        metadata:
+          name: "{{tenant_id}}-tenant-base"
+        spec:
+          project: "{{tenant_id}}"
+          source:
+            repoURL: "{{tenant_repo_url}}"
+            targetRevision: "{{tenant_default_branch}}"
+            path: "modules/tenant/base"
+            helm:
+              values: ""
+          destination:
+            server: "https://kubernetes.default.svc"
+            namespace: "tenant-base"
+
+  - id: "supplychain.sbom"
+    version: "0.7.0"
+    type: "SUPPLYCHAIN"
+    scope: "tenant"
+    requirements:
+      adapters: []
+      capabilities: {}
+      optional: true
+    supplychain:
+      tool: "syft"
+      options:
+        format: "cyclonedx-json"

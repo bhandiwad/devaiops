@@ -1,0 +1,9 @@
+id: "cicd.pack"
+name: "CI/CD Pack"
+description: "Enable GitOps and automation modules"
+required_modules:
+  - "gitops.argocd"
+  - "aiops.core"
+required_capabilities: {}
+finops_tags:
+  category: "delivery"

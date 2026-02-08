@@ -1,0 +1,30 @@
+
+tenant_id: "tenant-acme"
+display_name: "Acme Corp"
+mode: "BYOC"
+provider_profile_id: "generic-k8s-on-vms"
+k8s_access_ref:
+  type: "kubeconfig_file"
+  reference: "/path/to/kubeconfig"
+git:
+  repo_url: "ssh://git.example/acme/tenant-gitops"
+  default_branch: "main"
+modules:
+  enabled:
+    - "tenant.base"
+    - "aiops.core"
+    - "obs.prom-grafana-loki"
+services:
+  - id: "payments"
+    namespace: "default"
+    label_selector: "{app=\"payments\"}"
+    gitops_app: "tenant-acme-payments"
+observability:
+  mode: "centralized"
+remediation_allowlist:
+  - "RESOURCE_TUNE"
+  - "ROLLBACK"
+approval_policy:
+  low: "auto"
+  medium: "manual"
+  high: "manual"

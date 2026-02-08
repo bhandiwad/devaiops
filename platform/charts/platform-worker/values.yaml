@@ -1,0 +1,8 @@
+replicaCount: 2
+image:
+  repository: ghcr.io/example/platform-worker
+  tag: "0.7.0"
+  pullPolicy: IfNotPresent
+env:
+  PLATFORM_CONFIG_PATH: /etc/platform/platform_config.yaml
+resources: {}

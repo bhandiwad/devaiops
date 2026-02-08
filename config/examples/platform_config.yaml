@@ -1,0 +1,211 @@
+modules:
+  module_catalog_path: "config/module_catalog.yaml"
+
+identity:
+  provider: "keycloak"
+  oidc:
+    issuer_url: "https://keycloak.example/realms/platform"
+    client_id: "platform-api"
+    audience: "platform-api"
+    jwks_url: "https://keycloak.example/realms/platform/protocol/openid-connect/certs"
+  claims:
+    tenant_roles_claim: "tenant_roles"
+    realm_roles_claim: "realm_access.roles"
+    subject_claim: "sub"
+    email_claim: "email"
+  jwks_cache_seconds: 300
+
+adapters:
+  identity: "plugins.keycloak:KeycloakIdentityAdapter"
+  provisioner_default: "plugins.terraform:TerraformProvisionerAdapter"
+  capability_probe_default: "plugins.k8s:DefaultCapabilityProbe"
+  registrar_default: "plugins.k8s:DefaultRegistrarAdapter"
+  gitops: "plugins.argocd:ArgoCDGitOpsAdapter"
+  secrets: "plugins.vault:VaultSecretsAdapter"
+  registry: "plugins.harbor:HarborRegistryAdapter"
+  observability: "plugins.observability:LokiPromObservabilityAdapter"
+  git_provider: "plugins.git_github:GitHubGitProviderAdapter"
+  k8s: "plugins.k8s_client:K8sClientAdapter"
+  signature_verifier: "plugins.signature_stub:StubSignatureVerifier"
+  webhook_destination: "plugins.webhook_destination:GenericWebhookDestinationAdapter"
+  messaging: "plugins.messaging_webhook:WebhookMessagingAdapter"
+  ticketing: "plugins.ticketing_webhook:GenericTicketingAdapter"
+
+rbac:
+  roles:
+    - platform_admin
+    - tenant_admin
+    - tenant_operator
+    - tenant_developer
+    - tenant_viewer
+  defaults:
+    deny_by_default: true
+  pr_create_roles:
+    - tenant_operator
+    - tenant_admin
+  permissions:
+    tenant.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+    tenant.manage: ["tenant_admin", "platform_admin"]
+    tenant.plan: ["tenant_operator", "tenant_admin", "platform_admin"]
+    incident.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+    incident.ingest: ["tenant_operator", "tenant_admin", "platform_admin"]
+    incident.investigate: ["tenant_operator", "tenant_admin", "platform_admin"]
+    remediation.create_pr: ["tenant_operator", "tenant_admin", "platform_admin"]
+    audit.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+    policy.read: ["tenant_admin", "platform_admin"]
+    drift.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+    drift.run: ["tenant_operator", "tenant_admin", "platform_admin"]
+    export.create: ["tenant_admin", "platform_admin"]
+    export.read: ["tenant_admin", "platform_admin"]
+    platform.upgrade: ["platform_admin"]
+    platform.dr: ["platform_admin"]
+    product.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+    product.manage: ["tenant_admin", "platform_admin"]
+    scaffold.create: ["tenant_admin", "platform_admin"]
+    service.promote: ["tenant_operator", "tenant_admin", "platform_admin"]
+    access.request: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+
+config_repo:
+  mode: "git"
+  repo_url: "ssh://git.example/platform-config"
+  refresh_seconds: 60
+
+config_sources:
+  provider_profiles_path: "config/examples"
+  tenant_specs_path: "config/examples"
+  products_path: "config/products"
+
+database:
+  url: "postgresql+asyncpg://platform:platform@localhost:5432/platform"
+
+tenants:
+  default_status: "PROVISIONING"
+
+worker:
+  broker_url: "redis://localhost:6379/0"
+  result_backend: "redis://localhost:6379/0"
+
+gitops:
+  argocd:
+    server_url: "https://argocd.example"
+    verify_tls: true
+
+git_provider:
+  provider: "github"
+  api_url: "https://api.github.com"
+
+observability:
+  prometheus_base_url: "http://prometheus:9090"
+  loki_base_url: "http://loki:3100"
+  tenant_label: "tenant_id"
+
+aiops:
+  investigator_adapter: "plugins.investigator_local:LocalModelInvestigator"
+  allowlist_fix_types:
+    - RESOURCE_TUNE
+    - HPA_TUNE
+    - CONFIG_FIX
+    - ROLLBACK
+    - REDEPLOY
+    - IMAGE_TAG_FIX
+  max_prompt_chars: 8000
+  local_model:
+    base_url: "http://localhost:11434"
+    model: "llama3.1"
+
+artifacts:
+  store: "local"
+  local_path: "/tmp/aiops-artifacts"
+
+provisioning:
+  terraform_binary: "terraform"
+  terraform_work_dir: "/tmp/aiops-terraform"
+
+runbooks:
+  - id: "platform.upgrade"
+    description: "Upgrade platform control plane components"
+    required_role: "platform_admin"
+    inputs_schema:
+      type: "object"
+      required: ["target_version"]
+      properties:
+        target_version:
+          type: "string"
+    steps:
+      - type: "terraform.plan"
+        ref: "platform/control-plane"
+      - type: "terraform.apply"
+        ref: "platform/control-plane"
+  - id: "dr.postgres.backup"
+    description: "Run logical Postgres backup"
+    required_role: "platform_admin"
+    inputs_schema:
+      type: "object"
+      properties:
+        destination:
+          type: "string"
+    steps:
+      - type: "command"
+        command: "pg_dump --format=custom"
+  - id: "dr.artifacts.verify"
+    description: "Verify artifact backup copy and checksum"
+    required_role: "platform_admin"
+    inputs_schema:
+      type: "object"
+      properties:
+        target_store:
+          type: "string"
+    steps:
+      - type: "command"
+        command: "checksum-verify"
+
+policy:
+  engine: "simple"
+  rules_path: "config/policies"
+  deny_by_default: true
+
+drift:
+  schedule_seconds: 3600
+  detectors:
+    - terraform
+    - argocd
+    - posture
+
+rate_limit:
+  window_seconds: 60
+  max_requests: 300
+
+idempotency:
+  ttl_seconds: 7200
+  protected_paths:
+    - "/provision/apply"
+    - "/provision/destroy"
+    - "/runbooks/"
+    - "/exports"
+    - "/create-pr"
+    - "/transition"
+    - "/notify"
+    - "/create-ticket"
+    - "/subscriptions"
+    - "/products/"
+    - "/promote"
+    - "/upgrade/apply"
+
+metering:
+  schedule_seconds: 1800
+
+platform:
+  version: "0.7.0"
+
+dr:
+  enabled: true
+  backup_mode: "logical"
+
+tracing:
+  enabled: false
+  exporter: "stdout"
+  service_name: "platform-api"
+
+integrations:
+  timeout_seconds: 10
+  default_channel: "platform-alerts"

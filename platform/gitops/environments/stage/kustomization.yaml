@@ -1,0 +1,18 @@
+resources:
+  - ../dev/platform-api-app.yaml
+  - ../dev/platform-worker-app.yaml
+patches:
+  - target:
+      kind: Application
+      name: platform-api-dev
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: platform-api-stage
+  - target:
+      kind: Application
+      name: platform-worker-dev
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: platform-worker-stage

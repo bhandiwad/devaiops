@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-worker-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platform-worker-beat
+  template:
+    metadata:
+      labels:
+        app: platform-worker-beat
+    spec:
+      containers:
+        - name: beat
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["celery", "-A", "src.worker.celery_app", "beat", "--loglevel=INFO"]
+          env:
+            - name: PLATFORM_CONFIG_PATH
+              value: {{ .Values.env.PLATFORM_CONFIG_PATH | quote }}

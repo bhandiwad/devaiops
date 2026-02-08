@@ -1,0 +1,113 @@
+policies:
+  - action: "tenant.*"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - platform_admin
+  - action: "provision.*"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_admin
+        - platform_admin
+    obligations:
+      - type: require_approval
+  - action: "runbook.execute"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_admin
+        - platform_admin
+  - action: "remediation.create_pr"
+    effect: "allow"
+    conditions:
+      fix_types:
+        - RESOURCE_TUNE
+        - HPA_TUNE
+        - CONFIG_FIX
+        - ROLLBACK
+        - REDEPLOY
+        - IMAGE_TAG_FIX
+      paths_allowlist:
+        - "remediations/"
+      risk_max: medium
+    obligations:
+      - type: require_ticket_id
+      - type: required_checks
+        checks:
+          - "ci/lint"
+          - "ci/test"
+  - action: "drift.*"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_operator
+        - tenant_admin
+        - platform_admin
+  - action: "export.create"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_admin
+        - platform_admin
+  - action: "module.*"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_admin
+        - platform_admin
+  - action: "service.promote"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_operator
+        - tenant_admin
+        - platform_admin
+      risk_max: high
+      required_checks:
+        - "ci/lint"
+        - "ci/test"
+  - action: "scaffold.service"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_admin
+        - platform_admin
+  - action: "product.enable"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_admin
+        - platform_admin
+  - action: "product.disable"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_admin
+        - platform_admin
+  - action: "access.request.approve"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_admin
+        - platform_admin
+    obligations:
+      - type: require_2person_rule
+  - action: "access.request.create"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_viewer
+        - tenant_developer
+        - tenant_operator
+        - tenant_admin
+        - platform_admin
+  - action: "product.read"
+    effect: "allow"
+    conditions:
+      roles_any:
+        - tenant_viewer
+        - tenant_developer
+        - tenant_operator
+        - tenant_admin
+        - platform_admin

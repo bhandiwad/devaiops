@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "required": [
+    "id",
+    "capabilities"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "object"
+    },
+    "defaults": {
+      "type": "object"
+    },
+    "constraints": {
+      "type": "object"
+    },
+    "provisioning_defaults": {
+      "type": "object"
+    },
+    "auth_modes": {
+      "type": "object"
+    },
+    "module_overrides": {
+      "type": "object"
+    }
+  }
+}

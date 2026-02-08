@@ -1,0 +1,29 @@
+
+id: "generic-k8s-on-vms"
+capabilities:
+  supports_network_policy: true
+  supports_loadbalancer_service: false
+  supports_ingress: true
+  supports_cert_manager: true
+  supports_rwx_storage: false
+  supports_volume_snapshots: false
+  supports_psa: true
+  supports_k8s_oidc: false
+
+auth_modes:
+  argocd: "direct_oidc"
+  grafana: "direct_oidc"
+  harbor: "auth_proxy_oidc"
+  vault: "direct_oidc"
+  loki: "gateway_enforced"
+
+defaults:
+  ingress_class: "nginx"
+  storage_class: "standard"
+
+provisioning_defaults:
+  expected_outputs:
+    kubeconfig: "kubeconfig"
+    server: "cluster_endpoint"
+    token: "cluster_token"
+    ca: "cluster_ca"

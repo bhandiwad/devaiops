@@ -1,0 +1,9 @@
+id: "observability.pack"
+name: "Observability Pack"
+description: "Enable tenant observability modules and dashboards"
+required_modules:
+  - "obs.prom-grafana-loki"
+required_capabilities:
+  supports_ingress: true
+finops_tags:
+  category: "observability"

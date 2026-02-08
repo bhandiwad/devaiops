@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-worker
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: platform-worker
+  template:
+    metadata:
+      labels:
+        app: platform-worker
+    spec:
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["celery", "-A", "src.worker.celery_app", "worker", "--loglevel=INFO"]
+          env:
+            - name: PLATFORM_CONFIG_PATH
+              value: {{ .Values.env.PLATFORM_CONFIG_PATH | quote }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

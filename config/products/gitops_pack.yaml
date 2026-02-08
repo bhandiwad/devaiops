@@ -1,0 +1,8 @@
+id: "gitops.pack"
+name: "GitOps Pack"
+description: "Enable Argo CD tenant GitOps foundation"
+required_modules:
+  - "gitops.argocd"
+required_capabilities: {}
+finops_tags:
+  category: "delivery"

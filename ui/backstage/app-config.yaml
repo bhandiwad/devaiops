@@ -1,0 +1,41 @@
+app:
+  title: AIOps Platform
+  baseUrl: http://localhost:3000
+backend:
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+auth:
+  environment: development
+  providers:
+    keycloak:
+      development:
+        clientId: backstage
+        clientSecret: backstage-secret
+        issuer: http://localhost:8080/realms/platform
+proxy:
+  '/platform-api':
+    target: http://localhost:18000
+    headers:
+      Authorization: ${BACKSTAGE_TOKEN}
+      X-Dev-Principal: ${BACKSTAGE_DEV_PRINCIPAL}
+catalog:
+  rules:
+    - allow: [Component, API, Resource, System, Domain, Location, Template]
+  locations:
+    - type: file
+      target: ../../catalog-info.yaml
+    - type: file
+      target: ./catalog/platform-resources.yaml
+    - type: file
+      target: ./templates/web-service-python-fastapi.yaml
+    - type: file
+      target: ./templates/worker-service-python.yaml
+    - type: file
+      target: ./templates/react-frontend.yaml
+techdocs:
+  builder: local
+  generator:
+    runIn: local
+  publisher:
+    type: local

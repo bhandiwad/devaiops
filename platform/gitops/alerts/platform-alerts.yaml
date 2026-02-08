@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: platform-alerts
+  namespace: platform-system
+spec:
+  groups:
+    - name: platform-health
+      rules:
+        - alert: PlatformApiHighErrorRate
+          expr: sum(rate(platform_api_requests_total{status_code=~"5.."}[5m])) / sum(rate(platform_api_requests_total[5m])) > 0.05
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Platform API error rate is high
+        - alert: PlatformDriftFailures
+          expr: increase(platform_worker_jobs_total{job_type="run_drift",outcome="error"}[15m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Drift detection is failing repeatedly
+        - alert: PlatformExportFailures
+          expr: increase(platform_worker_jobs_total{job_type="export_tenant_bundle",outcome="error"}[15m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Export bundle generation failing

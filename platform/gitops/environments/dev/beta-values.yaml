@@ -1,0 +1,7 @@
+platform:
+  environment: dev
+  features:
+    beta_ui: true
+    synthetic_incidents: true
+security:
+  dev_auth_allowed: true

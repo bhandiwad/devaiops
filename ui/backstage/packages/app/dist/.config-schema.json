@@ -1,0 +1,1001 @@
+{
+  "schemas": [
+    {
+      "packageName": "@backstage/cli",
+      "value": {
+        "$schema": "https://backstage.io/schema/config-v1",
+        "title": "@backstage/cli",
+        "type": "object",
+        "properties": {
+          "app": {
+            "type": "object",
+            "properties": {
+              "baseUrl": {
+                "type": "string",
+                "visibility": "frontend"
+              },
+              "title": {
+                "type": "string",
+                "visibility": "frontend"
+              },
+              "datadogRum": {
+                "type": "object",
+                "description": "Datadog RUM events configuration",
+                "properties": {
+                  "env": {
+                    "type": "string",
+                    "visibility": "frontend",
+                    "description": "Environment for Datadog RUM events"
+                  },
+                  "clientToken": {
+                    "type": "string",
+                    "visibility": "frontend",
+                    "description": "clientToken for Datadog RUM events"
+                  },
+                  "applicationId": {
+                    "type": "string",
+                    "visibility": "frontend",
+                    "description": "applicationId for Datadog RUM events"
+                  },
+                  "site": {
+                    "type": "string",
+                    "visibility": "frontend",
+                    "description": "site for Datadog RUM events"
+                  },
+                  "sessionSampleRate": {
+                    "type": "number",
+                    "visibility": "frontend",
+                    "description": "sample rate of Datadog RUM events"
+                  },
+                  "sessionReplaySampleRate": {
+                    "type": "number",
+                    "visibility": "frontend",
+                    "description": "sample rate of session replays based upon already sampled Datadog RUM events"
+                  }
+                },
+                "required": [
+                  "clientToken",
+                  "applicationId"
+                ]
+              },
+              "listen": {
+                "type": "object",
+                "description": "Listening configuration for local development",
+                "properties": {
+                  "host": {
+                    "type": "string",
+                    "visibility": "frontend",
+                    "description": "The host that the frontend should be bound to. Only used for local development."
+                  },
+                  "port": {
+                    "type": "number",
+                    "visibility": "frontend",
+                    "description": "The port that the frontend should be bound to. Only used for local development."
+                  }
+                }
+              },
+              "https": {
+                "type": "object",
+                "description": "Only used for local development. The https object is passed to webpack in order to enable using https on localhost.",
+                "properties": {
+                  "certificate": {
+                    "type": "object",
+                    "description": "Parent object containing certificate and the private key",
+                    "required": [
+                      "key",
+                      "cert"
+                    ],
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "visibility": "secret",
+                        "description": "Https Certificate private key. Use $file to load in a file"
+                      },
+                      "cert": {
+                        "type": "string",
+                        "visibility": "secret",
+                        "description": "Https Certificate. Use $file to load in a file"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "path": "../../node_modules/@backstage/cli/package.json"
+    },
+    {
+      "path": "../../node_modules/@backstage/core-app-api/config.d.ts",
+      "value": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "description": "Generic frontend configuration.",
+            "type": "object",
+            "properties": {
+              "baseUrl": {
+                "description": "The public absolute root URL that the frontend.",
+                "visibility": "frontend",
+                "type": "string"
+              },
+              "title": {
+                "description": "The title of the app, as shown in the Backstage web interface.",
+                "visibility": "frontend",
+                "type": "string"
+              },
+              "support": {
+                "description": "Information about support of this Backstage instance and how to contact the integrator team.",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "description": "The primary support url.",
+                    "visibility": "frontend",
+                    "type": "string"
+                  },
+                  "items": {
+                    "description": "A list of categorized support item groupings.",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "description": "The title of the support item grouping.",
+                          "visibility": "frontend",
+                          "type": "string"
+                        },
+                        "icon": {
+                          "description": "An optional icon for the support item grouping.",
+                          "visibility": "frontend",
+                          "type": "string"
+                        },
+                        "links": {
+                          "description": "A list of support links for the Backstage instance inside this grouping.",
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "visibility": "frontend",
+                                "type": "string"
+                              },
+                              "title": {
+                                "visibility": "frontend",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "url"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "links",
+                        "title"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "items",
+                  "url"
+                ]
+              },
+              "routes": {
+                "type": "object",
+                "properties": {
+                  "bindings": {
+                    "description": "Maps external route references to regular route references. Both the\nkey and the value is expected to be on the form `<pluginId>.<routeId>`.\nIf the value is `false`, the route will be disabled even if it has a\ndefault mapping.",
+                    "deepVisibility": "frontend",
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "const": false,
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "baseUrl"
+            ]
+          },
+          "backend": {
+            "description": "Generic backend configuration.",
+            "type": "object",
+            "properties": {
+              "baseUrl": {
+                "description": "The public absolute root URL that the backend is reachable at, from the browser's perspective.",
+                "visibility": "frontend",
+                "type": "string"
+              }
+            },
+            "required": [
+              "baseUrl"
+            ]
+          },
+          "organization": {
+            "description": "Configuration that provides information about the organization that the app is for.",
+            "type": "object",
+            "properties": {
+              "name": {
+                "description": "The name of the organization that the app belongs to.",
+                "visibility": "frontend",
+                "type": "string"
+              }
+            }
+          },
+          "homepage": {
+            "description": "This config was used by the HomepageTimer but has been replaced  by the HeaderWorldClock in the home plugin",
+            "deprecated": "in favor of the HeaderWorldClock which is found in the home plugin",
+            "type": "object",
+            "properties": {
+              "clocks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "timezone": {
+                      "visibility": "frontend",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "timezone"
+                  ]
+                }
+              }
+            }
+          },
+          "auth": {
+            "description": "Configuration that provides information on available configured authentication providers.",
+            "type": "object",
+            "properties": {
+              "environment": {
+                "description": "The 'environment' attribute added as an optional parameter to have configurable environment value for `auth.providers`.\ndefault value: 'development'\noptional values: 'development' | 'production'",
+                "visibility": "frontend",
+                "type": "string"
+              }
+            }
+          },
+          "enableExperimentalRedirectFlow": {
+            "description": "Enable redirect authentication flow type, instead of a popup for authentication.",
+            "visibility": "frontend",
+            "type": "boolean"
+          },
+          "discovery": {
+            "description": "Discovery options.",
+            "visibility": "frontend",
+            "type": "object",
+            "properties": {
+              "endpoints": {
+                "description": "Endpoints\n\nA list of target baseUrls and the associated plugins.",
+                "visibility": "frontend",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "description": "The target baseUrl to use for the plugin\n\nCan be either a string or an object with internal and external keys. (Internal is used for the backend, external for the frontend)\nTargets with `{{pluginId}}` or `{{ pluginId }} in the url will be replaced with the pluginId.",
+                      "visibility": "frontend",
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "external": {
+                              "visibility": "frontend",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "plugins": {
+                      "description": "Array of plugins which use the target baseUrl.",
+                      "visibility": "frontend",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "plugins",
+                    "target"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "app",
+          "backend"
+        ],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "packageName": "@backstage/core-app-api"
+    },
+    {
+      "path": "../../node_modules/@backstage/core-components/config.d.ts",
+      "value": {
+        "type": "object",
+        "properties": {
+          "auth": {
+            "type": "object",
+            "properties": {
+              "autologout": {
+                "description": "Autologout feature configuration",
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "description": "Enable or disable the autologout feature",
+                    "visibility": "frontend",
+                    "type": "boolean"
+                  },
+                  "idleTimeoutMinutes": {
+                    "description": "Number of minutes after which the inactive user is logged out automatically.\nDefault is 60 minutes (1 hour)",
+                    "visibility": "frontend",
+                    "type": "number"
+                  },
+                  "promptBeforeIdleSeconds": {
+                    "description": "Number of seconds before the idle timeout where the user will be asked if it's still active.\nA dialog will be shown.\nDefault is 10 seconds.\nSet to 0 seconds to disable the prompt.",
+                    "visibility": "frontend",
+                    "type": "number"
+                  },
+                  "useWorkerTimers": {
+                    "description": "Enable/disable the usage of worker thread timers instead of main thread timers.\nDefault is true.\nIf you experience some browser incompatibility, you may try to set this to false.",
+                    "visibility": "frontend",
+                    "type": "boolean"
+                  },
+                  "logoutIfDisconnected": {
+                    "description": "Enable/disable the automatic logout also on users that are logged in but with no Backstage tabs open.\nDefault is true.",
+                    "visibility": "frontend",
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "packageName": "@backstage/core-components"
+    },
+    {
+      "path": "../../node_modules/@backstage/plugin-auth-react/node_modules/@backstage/core-components/config.d.ts",
+      "value": {
+        "type": "object",
+        "properties": {
+          "auth": {
+            "type": "object",
+            "properties": {
+              "autologout": {
+                "description": "Autologout feature configuration",
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "description": "Enable or disable the autologout feature",
+                    "visibility": "frontend",
+                    "type": "boolean"
+                  },
+                  "idleTimeoutMinutes": {
+                    "description": "Number of minutes after which the inactive user is logged out automatically.\nDefault is 60 minutes (1 hour)",
+                    "visibility": "frontend",
+                    "type": "number"
+                  },
+                  "promptBeforeIdleSeconds": {
+                    "description": "Number of seconds before the idle timeout where the user will be asked if it's still active.\nA dialog will be shown.\nDefault is 10 seconds.\nSet to 0 seconds to disable the prompt.",
+                    "visibility": "frontend",
+                    "type": "number"
+                  },
+                  "useWorkerTimers": {
+                    "description": "Enable/disable the usage of worker thread timers instead of main thread timers.\nDefault is true.\nIf you experience some browser incompatibility, you may try to set this to false.",
+                    "visibility": "frontend",
+                    "type": "boolean"
+                  },
+                  "logoutIfDisconnected": {
+                    "description": "Enable/disable the automatic logout also on users that are logged in but with no Backstage tabs open.\nDefault is true.",
+                    "visibility": "frontend",
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "packageName": "@backstage/core-components"
+    },
+    {
+      "path": "../../node_modules/@backstage/integration/config.d.ts",
+      "value": {
+        "type": "object",
+        "properties": {
+          "integrations": {
+            "description": "Configuration for integrations towards various external repository provider systems",
+            "visibility": "frontend",
+            "type": "object",
+            "properties": {
+              "azure": {
+                "description": "Integration configuration for Azure",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "description": "The hostname of the given Azure instance",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "token": {
+                      "description": "Token used to authenticate requests.",
+                      "visibility": "secret",
+                      "deprecated": "Use `credentials` instead.",
+                      "type": "string"
+                    },
+                    "credential": {
+                      "description": "The credential to use for requests.\n\nIf no credential is specified anonymous access is used.",
+                      "deepVisibility": "secret",
+                      "deprecated": "Use `credentials` instead.",
+                      "type": "object",
+                      "properties": {
+                        "clientId": {
+                          "type": "string"
+                        },
+                        "clientSecret": {
+                          "type": "string"
+                        },
+                        "tenantId": {
+                          "type": "string"
+                        },
+                        "personalAccessToken": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "credentials": {
+                      "description": "The credentials to use for requests. If multiple credentials are specified the first one that matches the organization is used.\nIf no organization matches the first credential without an organization is used.\n\nIf no credentials are specified at all, either a default credential (for Azure DevOps) or anonymous access (for Azure DevOps Server) is used.",
+                      "deepVisibility": "secret",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "organizations": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "clientSecret": {
+                            "type": "string"
+                          },
+                          "tenantId": {
+                            "type": "string"
+                          },
+                          "personalAccessToken": {
+                            "type": "string"
+                          },
+                          "managedIdentityClientId": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "commitSigningKey": {
+                      "description": "PGP signing key for signing commits.",
+                      "visibility": "secret",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "host"
+                  ]
+                }
+              },
+              "azureBlobStorage": {
+                "description": "Integration configuration for Azure Blob Storage",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "accountName": {
+                      "description": "The name of the Azure Storage Account, e.g., \"mystorageaccount\".",
+                      "type": "string"
+                    },
+                    "accountKey": {
+                      "description": "The primary or secondary key for the Azure Storage Account.\nOnly required if connectionString or SAS token are not specified.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "sasToken": {
+                      "description": "A Shared Access Signature (SAS) token for limited access to resources.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "connectionString": {
+                      "description": "A full connection string for the Azure Storage Account.\nThis includes the account name, key, and endpoint details.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "endpointSuffix": {
+                      "description": "Optional endpoint suffix for custom domains or sovereign clouds.\ne.g., \"core.windows.net\" for public Azure or \"core.usgovcloudapi.net\" for US Government cloud.",
+                      "type": "string"
+                    },
+                    "endpoint": {
+                      "description": "Optional endpoint URL for custom domain. Uses default if not provided.",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "aadCredential": {
+                      "description": "Optional credential to use for Azure Active Directory authentication.",
+                      "deepVisibility": "secret",
+                      "type": "object",
+                      "properties": {
+                        "clientId": {
+                          "description": "The client ID of the Azure AD application.",
+                          "type": "string"
+                        },
+                        "tenantId": {
+                          "description": "The tenant ID for Azure AD.",
+                          "type": "string"
+                        },
+                        "clientSecret": {
+                          "description": "The client secret for the Azure AD application.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "clientId",
+                        "clientSecret",
+                        "tenantId"
+                      ]
+                    }
+                  }
+                }
+              },
+              "bitbucket": {
+                "description": "Integration configuration for Bitbucket",
+                "deprecated": "replaced by bitbucketCloud and bitbucketServer",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "description": "The hostname of the given Bitbucket instance",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "token": {
+                      "description": "Token used to authenticate requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "apiBaseUrl": {
+                      "description": "The base url for the Bitbucket API, for example https://api.bitbucket.org/2.0",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "username": {
+                      "description": "The username to use for authenticated requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "appPassword": {
+                      "description": "Bitbucket app password used to authenticate requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "commitSigningKey": {
+                      "description": "PGP signing key for signing commits.",
+                      "visibility": "secret",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "host"
+                  ]
+                }
+              },
+              "bitbucketCloud": {
+                "description": "Integration configuration for Bitbucket Cloud",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "description": "The username to use for authenticated requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "token": {
+                      "description": "Token used to authenticate requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "appPassword": {
+                      "description": "Bitbucket Cloud app password used to authenticate requests.",
+                      "visibility": "secret",
+                      "deprecated": "Use `token` instead.",
+                      "type": "string"
+                    },
+                    "clientId": {
+                      "description": "OAuth client ID for Bitbucket Cloud.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "clientSecret": {
+                      "description": "OAuth client secret for Bitbucket Cloud.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "commitSigningKey": {
+                      "description": "PGP signing key for signing commits.",
+                      "visibility": "secret",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "bitbucketServer": {
+                "description": "Integration configuration for Bitbucket Server",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "description": "The hostname of the given Bitbucket Server instance",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "token": {
+                      "description": "Token used to authenticate requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "username": {
+                      "description": "Username used to authenticate requests with Basic Auth.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "password": {
+                      "description": "Password (or token as password) used to authenticate requests with Basic Auth.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "apiBaseUrl": {
+                      "description": "The base url for the Bitbucket Server API, for example https://<host>/rest/api/1.0",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "commitSigningKey": {
+                      "description": "PGP signing key for signing commits.",
+                      "visibility": "secret",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "host"
+                  ]
+                }
+              },
+              "gerrit": {
+                "description": "Integration configuration for Gerrit",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "description": "The hostname of the given Gerrit instance",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "baseUrl": {
+                      "description": "The base url for the Gerrit instance.",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "gitilesBaseUrl": {
+                      "description": "The gitiles base url.",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "cloneUrl": {
+                      "description": "The base url for cloning repos.",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "disableEditUrl": {
+                      "description": "Disable the edit url feature.",
+                      "visibility": "frontend",
+                      "type": "boolean"
+                    },
+                    "username": {
+                      "description": "The username to use for authenticated requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "password": {
+                      "description": "Gerrit password used to authenticate requests. This can be either a password\nor a generated access token.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "commitSigningKey": {
+                      "description": "PGP signing key for signing commits.",
+                      "visibility": "secret",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "gitilesBaseUrl",
+                    "host"
+                  ]
+                }
+              },
+              "github": {
+                "description": "Integration configuration for GitHub",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "description": "The hostname of the given GitHub instance",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "token": {
+                      "description": "Token used to authenticate requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "apiBaseUrl": {
+                      "description": "The base url for the GitHub API, for example https://api.github.com",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "rawBaseUrl": {
+                      "description": "The base url for GitHub raw resources, for example https://raw.githubusercontent.com",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "apps": {
+                      "description": "GitHub Apps configuration",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "appId": {
+                            "description": "The numeric GitHub App ID, string for environment variables",
+                            "type": [
+                              "string",
+                              "number"
+                            ]
+                          },
+                          "privateKey": {
+                            "description": "The private key to use for auth against the app",
+                            "visibility": "secret",
+                            "type": "string"
+                          },
+                          "webhookSecret": {
+                            "description": "The secret used for webhooks",
+                            "visibility": "secret",
+                            "type": "string"
+                          },
+                          "clientId": {
+                            "description": "The client ID to use",
+                            "type": "string"
+                          },
+                          "clientSecret": {
+                            "description": "The client secret to use",
+                            "visibility": "secret",
+                            "type": "string"
+                          },
+                          "allowedInstallationOwners": {
+                            "description": "List of installation owners allowed to be used by this GitHub app. The GitHub UI does not provide a way to list the installations.\nHowever you can list the installations with the GitHub API. You can find the list of installations here:\nhttps://api.github.com/app/installations\nThe relevant documentation for this is here.\nhttps://docs.github.com/en/rest/reference/apps#list-installations-for-the-authenticated-app--code-samples",
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "publicAccess": {
+                            "description": "If true, then an installation token will be issued for access when no other token is available.",
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "appId",
+                          "clientId",
+                          "clientSecret",
+                          "privateKey"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "host"
+                  ]
+                }
+              },
+              "gitlab": {
+                "description": "Integration configuration for GitLab",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "description": "The host of the target that this matches on, e.g. \"gitlab.com\".",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "apiBaseUrl": {
+                      "description": "The base URL of the API of this provider, e.g.\n\"https://gitlab.com/api/v4\", with no trailing slash.\n\nMay be omitted specifically for public GitLab; then it will be deduced.",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "token": {
+                      "description": "The authorization token to use for requests to this provider.\n\nIf no token is specified, anonymous access is used.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "baseUrl": {
+                      "description": "The baseUrl of this provider, e.g. \"https://gitlab.com\", which is\npassed into the GitLab client.\n\nIf no baseUrl is provided, it will default to https://${host}.",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "commitSigningKey": {
+                      "description": "PGP signing key for signing commits.",
+                      "visibility": "secret",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "host"
+                  ]
+                }
+              },
+              "googleGcs": {
+                "description": "Integration configuration for Google Cloud Storage",
+                "type": "object",
+                "properties": {
+                  "clientEmail": {
+                    "description": "Service account email used to authenticate requests.",
+                    "type": "string"
+                  },
+                  "privateKey": {
+                    "description": "Service account private key used to authenticate requests.",
+                    "visibility": "secret",
+                    "type": "string"
+                  }
+                }
+              },
+              "awsS3": {
+                "description": "Integration configuration for AWS S3 Service",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "endpoint": {
+                      "description": "AWS Endpoint.\nThe endpoint URI to send requests to. The default endpoint is built from the configured region.",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "s3ForcePathStyle": {
+                      "description": "Whether to use path style URLs when communicating with S3.\nDefaults to false.\nThis allows providers like LocalStack, Minio and Wasabi (and possibly others) to be used.",
+                      "visibility": "frontend",
+                      "type": "boolean"
+                    },
+                    "accessKeyId": {
+                      "description": "Account access key used to authenticate requests.",
+                      "type": "string"
+                    },
+                    "secretAccessKey": {
+                      "description": "Account secret key used to authenticate requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "roleArn": {
+                      "description": "ARN of the role to be assumed",
+                      "type": "string"
+                    },
+                    "externalId": {
+                      "description": "External ID to use when assuming role",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "gitea": {
+                "description": "Integration configuration for Gitea",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "description": "The hostname of the given Gitea instance",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "baseUrl": {
+                      "description": "The base url for the Gitea instance.",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "username": {
+                      "description": "The username to use for authenticated requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "password": {
+                      "description": "Gitea password used to authenticate requests. This can be either a password\nor a generated access token.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "commitSigningKey": {
+                      "description": "PGP signing key for signing commits.",
+                      "visibility": "secret",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "host"
+                  ]
+                }
+              },
+              "harness": {
+                "description": "Integration configuration for Harness Code",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "description": "The hostname of the given Harness Code instance",
+                      "visibility": "frontend",
+                      "type": "string"
+                    },
+                    "apiKey": {
+                      "description": "The apikey to use for authenticated requests.",
+                      "visibility": "secret",
+                      "type": "string"
+                    },
+                    "token": {
+                      "description": "Harness Code token used to authenticate requests. This can be either a generated access token.",
+                      "visibility": "secret",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "host"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "packageName": "@backstage/integration"
+    }
+  ],
+  "backstageConfigSchemaVersion": 1
+}

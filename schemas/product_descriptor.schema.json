@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": ["id", "name", "description", "required_modules"],
+  "properties": {
+    "id": {"type": "string"},
+    "name": {"type": "string"},
+    "description": {"type": "string"},
+    "required_modules": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "required_capabilities": {"type": "object"},
+    "finops_tags": {"type": "object"},
+    "allowed_tenants": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

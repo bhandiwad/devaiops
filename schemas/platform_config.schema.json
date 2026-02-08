@@ -1,0 +1,74 @@
+{
+  "type": "object",
+  "required": [
+    "modules",
+    "identity",
+    "adapters",
+    "rbac"
+  ],
+  "properties": {
+    "modules": {
+      "type": "object"
+    },
+    "identity": {
+      "type": "object"
+    },
+    "adapters": {
+      "type": "object"
+    },
+    "rbac": {
+      "type": "object"
+    },
+    "aiops": {
+      "type": "object"
+    },
+    "observability": {
+      "type": "object"
+    },
+    "git_provider": {
+      "type": "object"
+    },
+    "provisioning": {
+      "type": "object"
+    },
+    "artifacts": {
+      "type": "object"
+    },
+    "runbooks": {
+      "type": "array"
+    },
+    "policy": {
+      "type": "object"
+    },
+    "drift": {
+      "type": "object"
+    },
+    "rate_limit": {
+      "type": "object"
+    },
+    "idempotency": {
+      "type": "object"
+    },
+    "metering": {
+      "type": "object"
+    },
+    "platform": {
+      "type": "object"
+    },
+    "dr": {
+      "type": "object"
+    },
+    "tracing": {
+      "type": "object"
+    },
+    "integrations": {
+      "type": "object"
+    },
+    "gitops": {
+      "type": "object"
+    },
+    "config_repo": {
+      "type": "object"
+    }
+  }
+}

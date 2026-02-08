@@ -1,0 +1,16 @@
+{
+  "name": "aiops-backstage",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "npm --workspace app run start",
+    "build": "npm --workspace app run build"
+  },
+  "devDependencies": {
+    "@backstage/cli": "^0.31.0",
+    "typescript": "^5.4.0"
+  }
+}

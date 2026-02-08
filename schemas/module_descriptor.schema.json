@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "required": [
+    "id",
+    "version",
+    "type",
+    "scope",
+    "requirements"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "INSTALL",
+        "INTEGRATE",
+        "SUPPLYCHAIN"
+      ]
+    },
+    "scope": {
+      "enum": [
+        "management",
+        "tenant",
+        "both"
+      ]
+    },
+    "requirements": {
+      "type": "object",
+      "properties": {
+        "capabilities": {
+          "type": "object"
+        },
+        "adapters": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "optional": {
+          "type": "boolean"
+        }
+      }
+    },
+    "install": {
+      "type": "object",
+      "properties": {
+        "argo_application_template": {
+          "type": "object"
+        },
+        "values_overrides": {
+          "type": "object"
+        }
+      }
+    },
+    "integrate": {
+      "type": "object",
+      "properties": {
+        "adapter_config_requirements": {
+          "type": "object"
+        }
+      }
+    },
+    "supplychain": {
+      "type": "object",
+      "properties": {
+        "tool": { "type": "string" },
+        "options": { "type": "object" }
+      }
+    }
+  }
+}

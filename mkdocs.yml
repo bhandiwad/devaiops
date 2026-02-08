@@ -1,0 +1,15 @@
+site_name: AIOps Platform Docs
+nav:
+  - Home: README.md
+  - Architecture: docs/02-architecture.md
+  - Modularity: docs/03-modularity-model.md
+  - Config: docs/04-config-system.md
+  - API: docs/10-unified-api.md
+  - Backstage: docs/12-backstage-primary-ui.md
+  - Iteration 7 Ops: docs/17-scale-ha-ops.md
+  - Beta Quickstart: docs/beta/quickstart.md
+  - Beta Operator Guide: docs/beta/operator-guide.md
+  - Beta Tenant Admin Guide: docs/beta/tenant-admin-guide.md
+  - Beta Developer Guide: docs/beta/developer-guide.md
+  - Beta Security/Governance: docs/beta/security-governance.md
+  - Beta Known Limitations: docs/beta/known-limitations.md

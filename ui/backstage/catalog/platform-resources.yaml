@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: tenants
+  description: Tenant resources managed by Platform API
+spec:
+  type: platform-resource
+  owner: platform-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: runbooks
+  description: Operational runbooks
+spec:
+  type: platform-resource
+  owner: platform-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: modules
+  description: Module catalog resources
+spec:
+  type: platform-resource
+  owner: platform-team

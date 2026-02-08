@@ -1,0 +1,23 @@
+{
+  "name": "app",
+  "private": true,
+  "version": "0.1.0",
+  "main": "src/index.tsx",
+  "backstage": {
+    "role": "frontend"
+  },
+  "scripts": {
+    "start": "backstage-cli package start",
+    "build": "backstage-cli package build"
+  },
+  "dependencies": {
+    "@backstage/core-app-api": "^1.14.0",
+    "@backstage/core-components": "^0.16.0",
+    "@backstage/core-plugin-api": "^1.12.0",
+    "@backstage/plugin-auth-react": "^0.1.0",
+    "@material-ui/core": "^4.12.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.0"
+  }
+}

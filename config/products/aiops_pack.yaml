@@ -1,0 +1,8 @@
+id: "aiops.pack"
+name: "AIOps Pack"
+description: "Enable AI-driven incident investigation and PR-only remediation"
+required_modules:
+  - "aiops.core"
+required_capabilities: {}
+finops_tags:
+  category: "operations"

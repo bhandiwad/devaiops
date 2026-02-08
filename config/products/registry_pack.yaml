@@ -1,0 +1,8 @@
+id: "registry.pack"
+name: "Registry Pack"
+description: "Enable tenant-scoped Harbor registry project and RBAC bindings"
+required_modules:
+  - "registry.harbor"
+required_capabilities: {}
+finops_tags:
+  category: "registry"

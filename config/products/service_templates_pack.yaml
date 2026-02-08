@@ -1,0 +1,8 @@
+id: "templates.pack"
+name: "Service Template Pack"
+description: "Enable golden-path service templates"
+required_modules:
+  - "tenant.base"
+required_capabilities: {}
+finops_tags:
+  category: "developer-experience"

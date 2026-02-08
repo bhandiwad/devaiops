@@ -1,0 +1,67 @@
+{
+  "type": "object",
+  "required": [
+    "tenant_id",
+    "mode",
+    "provider_profile_id",
+    "git"
+  ],
+  "properties": {
+    "tenant_id": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "BYOC",
+        "PROVISIONED"
+      ]
+    },
+    "provider_profile_id": {
+      "type": "string"
+    },
+    "git": {
+      "type": "object"
+    },
+    "provisioner_ref": {
+      "type": "object"
+    },
+    "k8s_access_ref": {
+      "type": "object",
+      "required": ["type", "reference"],
+      "properties": {
+        "type": {
+          "enum": [
+            "vault_kv",
+            "kubeconfig_file",
+            "external_secret_ref",
+            "bootstrap_token"
+          ]
+        },
+        "reference": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "modules": {
+      "type": "object"
+    },
+    "approval_policy": {
+      "type": "object"
+    },
+    "remediation_allowlist": {
+      "type": "array"
+    },
+    "observability": {
+      "type": "object"
+    },
+    "policies": {
+      "type": "object"
+    }
+  }
+}
