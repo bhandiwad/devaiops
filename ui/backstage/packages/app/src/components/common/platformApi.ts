@@ -1,4 +1,4 @@
-const DEFAULT_PREFIX = 'http://localhost:18000/api/v1';
+const DEFAULT_PREFIX = '/api/v1';
 
 function apiPrefix(): string {
   const configured = (globalThis as { __PLATFORM_API_BASE__?: string }).__PLATFORM_API_BASE__;

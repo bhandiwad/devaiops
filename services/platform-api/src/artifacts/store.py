@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict
 
@@ -10,9 +11,11 @@ class ArtifactRef:
     location: str
 
 
-class ArtifactStore:
+class ArtifactStore(ABC):
+    @abstractmethod
     def put(self, name: str, data: bytes, content_type: str, tags: Dict[str, str]) -> ArtifactRef:
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def get(self, artifact_ref: ArtifactRef) -> bytes:
-        raise NotImplementedError
+        pass

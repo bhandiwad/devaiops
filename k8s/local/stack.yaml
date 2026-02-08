@@ -1,0 +1,514 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: platform-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: platform-deps
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keycloak
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: platform-secrets
+  namespace: platform-system
+type: Opaque
+stringData:
+  GITHUB_TOKEN: "changeme"
+  ARGOCD_TOKEN: "changeme"
+  VAULT_TOKEN: "root"
+  HARBOR_ADMIN_PASSWORD: "Harbor12345"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-config
+  namespace: platform-system
+data:
+  platform_config.yaml: |
+    modules:
+      module_catalog_path: "config/module_catalog.yaml"
+
+    identity:
+      provider: "keycloak"
+      oidc:
+        issuer_url: "http://keycloak.keycloak.svc.cluster.local:8080/realms/platform"
+        client_id: "platform-api"
+        audience: "platform-api"
+        jwks_url: "http://keycloak.keycloak.svc.cluster.local:8080/realms/platform/protocol/openid-connect/certs"
+      claims:
+        tenant_roles_claim: "tenant_roles"
+        realm_roles_claim: "realm_access.roles"
+        subject_claim: "sub"
+        email_claim: "email"
+      jwks_cache_seconds: 300
+
+    adapters:
+      identity: "plugins.keycloak:KeycloakIdentityAdapter"
+      provisioner_default: "plugins.terraform:TerraformProvisionerAdapter"
+      capability_probe_default: "plugins.k8s:DefaultCapabilityProbe"
+      registrar_default: "plugins.k8s:DefaultRegistrarAdapter"
+      gitops: "plugins.argocd:ArgoCDGitOpsAdapter"
+      secrets: "plugins.vault:VaultSecretsAdapter"
+      registry: "plugins.harbor:HarborRegistryAdapter"
+      observability: "plugins.observability:LokiPromObservabilityAdapter"
+      git_provider: "plugins.git_github:GitHubGitProviderAdapter"
+      k8s: "plugins.k8s_client:K8sClientAdapter"
+      signature_verifier: "plugins.signature_stub:StubSignatureVerifier"
+      webhook_destination: "plugins.webhook_destination:GenericWebhookDestinationAdapter"
+      messaging: "plugins.messaging_webhook:WebhookMessagingAdapter"
+      ticketing: "plugins.ticketing_webhook:GenericTicketingAdapter"
+
+    rbac:
+      roles: ["platform_admin", "tenant_admin", "tenant_operator", "tenant_developer", "tenant_viewer"]
+      defaults:
+        deny_by_default: true
+      pr_create_roles: ["tenant_operator", "tenant_admin"]
+      permissions:
+        tenant.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+        tenant.manage: ["tenant_admin", "platform_admin"]
+        tenant.plan: ["tenant_operator", "tenant_admin", "platform_admin"]
+        incident.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+        incident.ingest: ["tenant_operator", "tenant_admin", "platform_admin"]
+        incident.investigate: ["tenant_operator", "tenant_admin", "platform_admin"]
+        remediation.create_pr: ["tenant_operator", "tenant_admin", "platform_admin"]
+        audit.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+        policy.read: ["tenant_admin", "platform_admin"]
+        drift.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+        drift.run: ["tenant_operator", "tenant_admin", "platform_admin"]
+        export.create: ["tenant_admin", "platform_admin"]
+        export.read: ["tenant_admin", "platform_admin"]
+        platform.upgrade: ["platform_admin"]
+        platform.dr: ["platform_admin"]
+        product.read: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+        product.manage: ["tenant_admin", "platform_admin"]
+        scaffold.create: ["tenant_admin", "platform_admin"]
+        service.promote: ["tenant_operator", "tenant_admin", "platform_admin"]
+        access.request: ["tenant_viewer", "tenant_developer", "tenant_operator", "tenant_admin", "platform_admin"]
+
+    config_sources:
+      provider_profiles_path: "config/examples"
+      tenant_specs_path: "config/examples"
+      products_path: "config/products"
+
+    database:
+      url: "postgresql+asyncpg://platform:platform@postgres.platform-deps.svc.cluster.local:5432/platform"
+
+    tenants:
+      default_status: "PROVISIONING"
+
+    worker:
+      broker_url: "redis://redis.platform-deps.svc.cluster.local:6379/0"
+      result_backend: "redis://redis.platform-deps.svc.cluster.local:6379/0"
+
+    gitops:
+      argocd:
+        server_url: "http://argocd-server.argocd.svc.cluster.local"
+        verify_tls: false
+
+    git_provider:
+      provider: "github"
+      api_url: "https://api.github.com"
+
+    registry:
+      harbor:
+        base_url: "http://harbor.registry.svc.cluster.local"
+        external_url: "http://localhost:30084"
+        verify_tls: false
+        project_prefix: "tenant-"
+
+    observability:
+      prometheus_base_url: "http://prometheus.observability.svc.cluster.local:9090"
+      loki_base_url: "http://loki.observability.svc.cluster.local:3100"
+      tenant_label: "tenant_id"
+
+    aiops:
+      investigator_adapter: "plugins.investigator_local:LocalModelInvestigator"
+      allowlist_fix_types: ["RESOURCE_TUNE", "HPA_TUNE", "CONFIG_FIX", "ROLLBACK", "REDEPLOY", "IMAGE_TAG_FIX"]
+      max_prompt_chars: 8000
+      local_model:
+        base_url: "http://host.docker.internal:11434"
+        model: "llama3.1"
+
+    artifacts:
+      store: "local"
+      local_path: "/tmp/aiops-artifacts"
+
+    provisioning:
+      terraform_binary: "terraform"
+      terraform_work_dir: "/tmp/aiops-terraform"
+
+    policy:
+      engine: "simple"
+      rules_path: "config/policies"
+      deny_by_default: true
+
+    drift:
+      schedule_seconds: 3600
+      detectors: ["terraform", "argocd", "posture"]
+
+    rate_limit:
+      window_seconds: 60
+      max_requests: 300
+
+    idempotency:
+      ttl_seconds: 7200
+      protected_paths:
+        - "/provision/apply"
+        - "/provision/destroy"
+        - "/runbooks/"
+        - "/exports"
+        - "/create-pr"
+        - "/transition"
+        - "/notify"
+        - "/create-ticket"
+        - "/subscriptions"
+        - "/products/"
+        - "/promote"
+        - "/upgrade/apply"
+
+    metering:
+      schedule_seconds: 1800
+
+    platform:
+      version: "0.9.0"
+
+    dr:
+      enabled: true
+      backup_mode: "logical"
+
+    tracing:
+      enabled: false
+      exporter: "stdout"
+      service_name: "platform-api"
+
+    integrations:
+      timeout_seconds: 10
+      default_channel: "platform-alerts"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: platform-deps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          env:
+            - name: POSTGRES_USER
+              value: platform
+            - name: POSTGRES_PASSWORD
+              value: platform
+            - name: POSTGRES_DB
+              value: platform
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: pgdata
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: platform-deps
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: platform-deps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: platform-deps
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.0
+          args: ["start-dev", "--http-port=8080"]
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  type: NodePort
+  selector:
+    app: keycloak
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30082
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: platform-db-init
+  namespace: platform-system
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init
+          image: postgres:16
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until pg_isready -h postgres.platform-deps.svc.cluster.local -U platform; do echo waiting for postgres; sleep 2; done
+              psql "postgresql://platform:platform@postgres.platform-deps.svc.cluster.local:5432/platform" -f /schema/schema.sql
+          volumeMounts:
+            - name: schema
+              mountPath: /schema
+      volumes:
+        - name: schema
+          configMap:
+            name: db-schema
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-api
+  namespace: platform-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platform-api
+  template:
+    metadata:
+      labels:
+        app: platform-api
+    spec:
+      containers:
+        - name: api
+          image: local/aiops-platform-api:dev
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DEV_AUTH
+              value: "true"
+            - name: PLATFORM_CONFIG_PATH
+              value: /app/config/platform_config.yaml
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: platform-secrets
+                  key: GITHUB_TOKEN
+            - name: ARGOCD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: platform-secrets
+                  key: ARGOCD_TOKEN
+            - name: VAULT_ADDR
+              value: "http://vault.vault.svc.cluster.local:8200"
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: platform-secrets
+                  key: VAULT_TOKEN
+            - name: HARBOR_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-secrets
+                  key: HARBOR_ADMIN_PASSWORD
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: platform-config
+              mountPath: /app/config/platform_config.yaml
+              subPath: platform_config.yaml
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: platform-config
+          configMap:
+            name: platform-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-api
+  namespace: platform-system
+spec:
+  type: NodePort
+  selector:
+    app: platform-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-worker
+  namespace: platform-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platform-worker
+  template:
+    metadata:
+      labels:
+        app: platform-worker
+    spec:
+      containers:
+        - name: worker
+          image: local/aiops-platform-api:dev
+          imagePullPolicy: IfNotPresent
+          command: ["celery", "-A", "src.worker.celery_app", "worker", "--loglevel=INFO"]
+          env:
+            - name: DEV_AUTH
+              value: "true"
+            - name: PLATFORM_CONFIG_PATH
+              value: /app/config/platform_config.yaml
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: platform-secrets
+                  key: GITHUB_TOKEN
+            - name: ARGOCD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: platform-secrets
+                  key: ARGOCD_TOKEN
+            - name: VAULT_ADDR
+              value: "http://vault.vault.svc.cluster.local:8200"
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: platform-secrets
+                  key: VAULT_TOKEN
+            - name: HARBOR_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: platform-secrets
+                  key: HARBOR_ADMIN_PASSWORD
+          volumeMounts:
+            - name: platform-config
+              mountPath: /app/config/platform_config.yaml
+              subPath: platform_config.yaml
+      volumes:
+        - name: platform-config
+          configMap:
+            name: platform-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backstage
+  namespace: platform-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backstage
+  template:
+    metadata:
+      labels:
+        app: backstage
+    spec:
+      containers:
+        - name: backstage
+          image: local/aiops-backstage:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backstage
+  namespace: platform-system
+spec:
+  type: NodePort
+  selector:
+    app: backstage
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080

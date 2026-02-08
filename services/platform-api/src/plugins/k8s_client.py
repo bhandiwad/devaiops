@@ -77,4 +77,25 @@ class K8sClientAdapter(K8sAdapter):
         return Events(entries=entries)
 
     def get_resource(self, cluster_ref: ClusterRef, gvk: Dict[str, str], name: str, namespace: str) -> Resource:
-        raise NotImplementedError("Generic resource fetch is not implemented")
+        api_client = self._load_client(cluster_ref)
+        kind = str(gvk.get("kind", "")).lower()
+        if kind == "deployment":
+            obj = client.AppsV1Api(api_client).read_namespaced_deployment(name=name, namespace=namespace)
+            return Resource(body=obj.to_dict())
+        if kind == "pod":
+            obj = client.CoreV1Api(api_client).read_namespaced_pod(name=name, namespace=namespace)
+            return Resource(body=obj.to_dict())
+        if kind == "service":
+            obj = client.CoreV1Api(api_client).read_namespaced_service(name=name, namespace=namespace)
+            return Resource(body=obj.to_dict())
+        group = gvk.get("group", "")
+        version = gvk.get("version")
+        plural = gvk.get("plural")
+        if version and plural:
+            custom = client.CustomObjectsApi(api_client)
+            if group:
+                body = custom.get_namespaced_custom_object(group=group, version=version, namespace=namespace, plural=plural, name=name)
+            else:
+                body = custom.get_namespaced_custom_object(group="", version=version, namespace=namespace, plural=plural, name=name)
+            return Resource(body=body)
+        raise RuntimeError(f"Unsupported get_resource request: gvk={gvk}")

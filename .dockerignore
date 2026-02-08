@@ -1,0 +1,7 @@
+.git
+**/.venv
+**/node_modules
+**/.pytest_cache
+**/__pycache__
+**/*.pyc
+ui/backstage/packages/app/dist/static/*.map

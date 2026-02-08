@@ -1,22 +1,26 @@
 from __future__ import annotations
 
 from adapters.interfaces import GitProviderAdapter, PRChecks, PRRef, PRStatus, RepoRef
+from plugins.git_github import GitHubGitProviderAdapter
 
 
 class GenericGitProviderAdapter(GitProviderAdapter):
-    """Stub git provider adapter."""
+    """Generic adapter that currently routes to the GitHub implementation."""
+
+    def __init__(self, platform_config=None) -> None:
+        self._delegate = GitHubGitProviderAdapter(platform_config=platform_config)
 
     def scaffold_repo(self, template_ref, parameters) -> RepoRef:
-        raise NotImplementedError("GenericGitProviderAdapter.scaffold_repo is not implemented")
+        return self._delegate.scaffold_repo(template_ref, parameters)
 
     def create_pull_request(self, repo_ref: RepoRef, branch: str, title: str, body: str, changes) -> PRRef:
-        raise NotImplementedError("GenericGitProviderAdapter.create_pull_request is not implemented")
+        return self._delegate.create_pull_request(repo_ref, branch, title, body, changes)
 
     def get_pull_request_status(self, pr_ref: PRRef) -> PRStatus:
-        raise NotImplementedError("GenericGitProviderAdapter.get_pull_request_status is not implemented")
+        return self._delegate.get_pull_request_status(pr_ref)
 
     def add_labels(self, pr_ref: PRRef, labels) -> None:
-        raise NotImplementedError("GenericGitProviderAdapter.add_labels is not implemented")
+        self._delegate.add_labels(pr_ref, labels)
 
     def get_pull_request_checks(self, pr_ref: PRRef) -> PRChecks:
-        raise NotImplementedError("GenericGitProviderAdapter.get_pull_request_checks is not implemented")
+        return self._delegate.get_pull_request_checks(pr_ref)

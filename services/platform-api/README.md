@@ -68,10 +68,33 @@ curl -H 'X-Dev-Principal: {"principal_id":"dev-user","email":"dev@example.com","
   http://localhost:8000/api/v1/me
 ```
 
+## Kubernetes deployment (local cluster)
+From repo root:
+```bash
+docker build -f services/platform-api/Dockerfile -t local/aiops-platform-api:dev .
+docker build -f ui/backstage/Dockerfile -t local/aiops-backstage:dev .
+
+kubectl apply -f k8s/local/stack.yaml
+kubectl apply -f k8s/local/observability-vault.yaml
+
+helm repo add harbor https://helm.goharbor.io
+helm repo update
+helm upgrade --install harbor harbor/harbor -n registry -f k8s/local/harbor-values.yaml
+```
+
+NodePort access:
+- Backstage: `http://localhost:30080`
+- API: `http://localhost:30081`
+- Keycloak: `http://localhost:30082`
+- Argo CD: `http://localhost:30083`
+- Harbor: `http://localhost:30084`
+
 ## Config
 - Default config path is `config/examples/platform_config.yaml` (override with `PLATFORM_CONFIG_PATH`).
 - Module catalog path is read from `PlatformConfig.modules.module_catalog_path`.
 - Provider profiles and tenant specs are loaded from `PlatformConfig.config_sources`.
+- For local k8s, runtime config is injected via ConfigMap in `k8s/local/stack.yaml`.
+- Harbor runtime settings are under `registry.harbor` and consumed by `plugins.harbor:HarborRegistryAdapter`.
 - Iteration 7 settings:
   - `rate_limit`: per-tenant/principal request limits
   - `idempotency`: protected POST routes and key TTL
@@ -142,3 +165,9 @@ make sdk
 cd /Users/pb/devops_ai/aiops_platform_docs/services/platform-api
 uv run pytest
 ```
+
+## Adapter implementation status
+- Harbor registry adapter: implemented (`ensure_tenant_project`, `ensure_role_bindings`, `create_robot_account`)
+- Terraform provisioner adapter: implemented (`provision`, `upgrade`, `deprovision`) and wired to runner
+- Vault adapter: implemented baseline auth/policy/audit + KV read/write
+- K8s default adapters: implemented capability probe, registrar bootstrap, resource/event/workload reads

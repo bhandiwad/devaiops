@@ -69,6 +69,24 @@ Then open:
 - Backstage: `http://localhost:3000`
 - Platform API docs: `http://localhost:18000/docs`
 
+## Kubernetes Quickstart (Local Cluster)
+```bash
+docker build -f services/platform-api/Dockerfile -t local/aiops-platform-api:dev .
+docker build -f ui/backstage/Dockerfile -t local/aiops-backstage:dev .
+kubectl apply -f k8s/local/stack.yaml
+kubectl apply -f k8s/local/observability-vault.yaml
+helm repo add harbor https://helm.goharbor.io
+helm repo update
+helm upgrade --install harbor harbor/harbor -n registry -f k8s/local/harbor-values.yaml
+```
+
+Access:
+- Backstage: `http://localhost:30080`
+- API: `http://localhost:30081`
+- Keycloak: `http://localhost:30082`
+- Argo CD: `http://localhost:30083`
+- Harbor: `http://localhost:30084`
+
 ## Local Development
 Platform API:
 ```bash
@@ -126,4 +144,3 @@ Optional demo reset:
 
 ## Notes on Extensibility
 This platform is intentionally adapter-first. You can swap or add integrations for identity, GitOps, registry, secrets, provisioning substrates, observability, ticketing, and messaging without changing core orchestration logic.
-

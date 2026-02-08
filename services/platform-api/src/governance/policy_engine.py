@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
@@ -26,9 +27,10 @@ class PolicyContext:
     request_meta: Dict[str, Any]
 
 
-class BasePolicyEngine:
+class BasePolicyEngine(ABC):
+    @abstractmethod
     def evaluate(self, context: PolicyContext) -> PolicyDecisionResult:
-        raise NotImplementedError
+        pass
 
 
 def _roles_for(principal: PrincipalContext, tenant_id: Optional[str]) -> List[str]:

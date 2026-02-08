@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
@@ -16,9 +17,10 @@ class DriftResult:
     summary: Dict[str, Any]
 
 
-class DriftDetector:
+class DriftDetector(ABC):
+    @abstractmethod
     def detect(self, tenant_id: str) -> DriftResult:
-        raise NotImplementedError
+        pass
 
 
 class TerraformDriftDetector(DriftDetector):
