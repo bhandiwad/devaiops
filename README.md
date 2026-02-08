@@ -1,36 +1,129 @@
+# AIOps Platform
 
-# Modular AIOps DevOps Platform (Cluster-per-Tenant)
+A modular, config-driven DevOps platform for multi-tenant operations with **cluster-per-tenant** as the default model.
 
-This repo is a *Codex-ready documentation pack* for building a modular DevOps-as-a-Service platform where **each tenant gets its own Kubernetes cluster** and the user experience is delivered primarily through **Backstage** (custom plugins), with a **unified Platform API** and a **unified CLI** named **aiopsctl**.
+It provides a unified control plane built around:
+- **Backstage** as the primary user experience
+- **Platform API (`/api/v1`)** as the single backend contract
+- **`aiopsctl` CLI** as an API-first automation client
 
-The platform is designed to integrate with:
-- Any Kubernetes distribution (managed or self-managed, upstream or vendor)
-- Any infrastructure substrate / hypervisor (including HPE VM Essentials) via pluggable provisioners
+## What You Get
+- Tenant onboarding for `BYOC` and `PROVISIONED` modes
+- GitOps orchestration per tenant (Argo CD adapter)
+- Tenant-scoped secrets (Vault adapter)
+- Tenant-scoped observability workflows (Prometheus/Loki/Grafana integration model)
+- Incident evidence pipeline + investigator + PR-only remediation loop
+- Policy-gated operations, approvals, audit trails, and compliance exports
+- Drift detection, runbooks, metering/FinOps foundations, and platform ops endpoints
 
-## Core capabilities
-- Cluster-per-tenant onboarding (BYOC or provisioned)
-- GitOps execution via Argo CD
-- Secrets via HashiCorp Vault
-- Registry via Harbor
-- Observability via Prometheus + Grafana + Loki (centralized or per-tenant)
-- AI-assisted investigations + PR-based remediation (no direct prod mutations)
-- Keycloak SSO everywhere + unified RBAC propagated to integrated systems
-- Full modularity via external configuration + adapter plugins + capability flags
+## Core Design Principles
+- No hardcoded infrastructure assumptions
+- All behavior is externalized to configuration
+- Vendor/tool specifics live in adapters/plugins, not core logic
+- Security enforcement is server-side (API/worker), not UI-only
+- AI actions remain safe by design: **proposal + PR only**, no direct prod mutation
 
-## Design invariants (non-negotiable)
-1. **No assumptions about Kubernetes distro** (CNI/CSI/Ingress/LB/DNS are not assumed).
-2. **All behavior is config-driven**; configs live outside code.
-3. **Adapters isolate vendor/tool differences**; core logic does not import vendor specifics.
-4. **Safe AIOps**: AI proposes PRs only; GitOps applies changes.
-5. **Unified control plane**: Backstage and aiopsctl call the Platform API only.
+## High-Level Architecture
+```mermaid
+flowchart LR
+  U["Backstage UI"] --> API["Platform API /api/v1"]
+  C["aiopsctl"] --> API
+  API --> DB["Postgres"]
+  API --> W["Worker"]
+  W --> ADP["Adapters"]
+  ADP --> ARGO["Argo CD"]
+  ADP --> VAULT["Vault"]
+  ADP --> KC["Keycloak"]
+  ADP --> OBS["Prometheus/Loki/Grafana"]
+  ADP --> GIT["Git Provider"]
+  ADP --> TF["Terraform Runner"]
+```
 
-## Contents
-- docs/: architecture + modularity + adapters + RBAC/SSO + runbooks + task breakdown
-- schemas/: JSON schemas for configs and AI artifacts
-- config/examples/: sample configs (no secrets)
-- db/: Postgres DDL and data model notes
+## Repository Layout
+- `services/platform-api/`: FastAPI service, workers, adapters, policies, storage, tests
+- `services/aiopsctl/`: unified CLI
+- `ui/backstage/`: Backstage app and plugin pages
+- `platform/gitops/`: management-plane GitOps manifests/charts
+- `config/`: platform/module/provider/product/policy config examples
+- `schemas/`: JSON schemas for config and AI artifacts
+- `db/`: SQL schema
+- `docs/`: architecture and operator/developer documentation
+- `sdk/`: generated Python and TypeScript clients
+- `dev/`: local install/verify/demo/reset scripts
 
-## Licensing note (important)
-You said you're ok with HashiCorp Vault and Terraform. Be aware:
-- HashiCorp changed Terraform/Vault licensing to BSL (Business Source License). BSL is typically free to use, but it is not OSI “open source”.
-- If you ever need OSI-only alternatives later, swap adapters (e.g., OpenTofu/OpenBao) without changing platform core.
+## Beta Quickstart
+Prerequisites:
+- Docker / Docker Compose
+- Python 3.11+
+- `uv`
+- Node.js (for Backstage development)
+
+From repository root:
+```bash
+make beta-install
+make beta-verify
+make beta-demo
+```
+
+Then open:
+- Backstage: `http://localhost:3000`
+- Platform API docs: `http://localhost:18000/docs`
+
+## Local Development
+Platform API:
+```bash
+cd services/platform-api
+uv sync
+uv run uvicorn src.main:app --reload --port 18000
+```
+
+Backstage:
+```bash
+cd ui/backstage
+npm install
+npm start
+```
+
+Optional demo reset:
+```bash
+./dev/beta-reset.sh
+```
+
+## Key Workflows Supported in UI/CLI
+- Tenant onboarding and lifecycle tracking
+- Product marketplace enable/disable with policy gates
+- Service scaffolding and promotion workflows
+- Deployment status, sync, rollback actions
+- Incident timeline: evidence -> investigate -> create PR -> close
+- Drift dashboards and manual drift runs
+- Access requests and approvals
+- Export bundle generation and download
+- Metering views and collection triggers
+
+## API, CLI, and SDK
+- Stable API: `/api/v1`
+- CLI: `services/aiopsctl/src/aiopsctl.py`
+- SDKs:
+  - `sdk/python/`
+  - `sdk/typescript/`
+
+## Security and Governance
+- Keycloak-backed identity adapter support
+- Configurable RBAC + policy engine enforcement hooks
+- Correlation-aware audit trails and policy decision persistence
+- Vault-backed secret reference patterns (no secrets in Postgres)
+- Tenant scoping enforced for observability and high-risk operations
+
+## Documentation Index
+- Beta docs index: `docs/beta/README.md`
+- Quickstart: `docs/beta/quickstart.md`
+- Operator guide: `docs/beta/operator-guide.md`
+- Tenant admin guide: `docs/beta/tenant-admin-guide.md`
+- Developer guide: `docs/beta/developer-guide.md`
+- Security/governance guide: `docs/beta/security-governance.md`
+- Known limitations: `docs/beta/known-limitations.md`
+- Release scope: `BETA_RELEASE.md`
+
+## Notes on Extensibility
+This platform is intentionally adapter-first. You can swap or add integrations for identity, GitOps, registry, secrets, provisioning substrates, observability, ticketing, and messaging without changing core orchestration logic.
+
